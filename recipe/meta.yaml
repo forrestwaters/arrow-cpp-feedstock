@@ -10,39 +10,46 @@ source:
   fn: {{ commit }}.tar.gz
   url: https://github.com/apache/arrow/archive/{{ commit }}.tar.gz
   sha256: {{ checksum }}
+  patches:
+    - 0001-remove-Werror-for-compilation-on-mac-and-linux-32.patch
+    - 0002-add-external-ORC-capability.patch
+    - 0003-add-orc-Exceptions.hh-to-adapter.cc.patch
+    - 0004-guard-CXXFLAGS-setting-with-check-to-see-if-it-s-alr.patch
 
 build:
-  number: 0
-  skip: true  # [win32]
-  skip: true  # [win and py<35]
-  features:
-    - vc14  # [win and py>=35]
+  number: 6
+  skip: true  # [(win and vc<14) or win32 or linux32]
+  run_exports:
+    - {{ pin_subpackage("arrow-cpp", max_pin="x.x") }}
 
 requirements:
   build:
     - cmake
-    - autoconf  # [unix]
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
+    - autoconf              # [unix]
   host:
-    - boost-cpp
+    - libboost {{ boost }}
     - flatbuffers
     - rapidjson
     - zlib
     - snappy
     - brotli
     - zstd
+    - orc
+    - protobuf
+    # for run exports
+    - libprotobuf
     - lz4-c
+    # arrow builds its own, because the do some squirrelly mods to it
+    # - jemalloc      # [unix]
     - python
-    - numpy 1.10.*   # [not (win and py>=36)]
-    - numpy 1.12.*   # [win and py>=36]
+    - numpy 1.11.*
 
   run:
-    - boost-cpp
+    - libboost {{ boost }}
+    - {{ pin_compatible('numpy') }}
     - python
-    - {{ pin_compatible('numpy', lower_bound='1.10') }}   # [not (win and py>=36)]
-    - {{ pin_compatible('numpy', lower_bound='1.12') }}   # [win and py>=36]
-    - snappy  # [win and py>=35]
 
 test:
   commands:
@@ -75,3 +82,4 @@ extra:
     - kou
     - kszucs
     - pitrou
+    - msarahan

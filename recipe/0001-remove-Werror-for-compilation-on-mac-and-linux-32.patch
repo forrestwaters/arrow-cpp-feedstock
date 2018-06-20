@@ -1,0 +1,44 @@
+From 21d83cb4bef4220283f567ab912191661fef7a95 Mon Sep 17 00:00:00 2001
+From: Mike Sarahan <msarahan@gmail.com>
+Date: Fri, 6 Apr 2018 17:54:39 +0000
+Subject: [PATCH] remove -Werror for compilation on mac and linux-32
+
+---
+ cpp/cmake_modules/SetupCxxFlags.cmake | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/cpp/cmake_modules/SetupCxxFlags.cmake b/cpp/cmake_modules/SetupCxxFlags.cmake
+index 28d903f..9151860 100644
+--- a/cpp/cmake_modules/SetupCxxFlags.cmake
++++ b/cpp/cmake_modules/SetupCxxFlags.cmake
+@@ -122,11 +122,11 @@ if ("${UPPERCASE_BUILD_WARNING_LEVEL}" STREQUAL "CHECKIN")
+     endif()
+ 
+     # Treat all compiler warnings as errors
+-    set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} -Wno-unknown-warning-option -Werror")
++    set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} -Wno-unknown-warning-option ")
+   elseif ("${COMPILER_FAMILY}" STREQUAL "gcc")
+     set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} -Wall -Wconversion -Wno-sign-conversion")
+     # Treat all compiler warnings as errors
+-    set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} -Wno-unknown-warning-option -Werror")
++    set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} -Wno-unknown-warning-option ")
+   else()
+     message(FATAL_ERROR "Unknown compiler. Version info:\n${COMPILER_VERSION_FULL}")
+   endif()
+@@ -142,11 +142,11 @@ elseif ("${UPPERCASE_BUILD_WARNING_LEVEL}" STREQUAL "EVERYTHING")
+   elseif ("${COMPILER_FAMILY}" STREQUAL "clang")
+     set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic")
+     # Treat all compiler warnings as errors
+-    set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} -Werror")
++    set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} ")
+   elseif ("${COMPILER_FAMILY}" STREQUAL "gcc")
+     set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} -Wall -Wpedantic -Wextra -Wno-unused-parameter")
+     # Treat all compiler warnings as errors
+-    set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} -Werror")
++    set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} ")
+   else()
+     message(FATAL_ERROR "Unknown compiler. Version info:\n${COMPILER_VERSION_FULL}")
+   endif()
+-- 
+2.16.1
+
