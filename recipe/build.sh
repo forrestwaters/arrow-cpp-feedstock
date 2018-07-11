@@ -35,7 +35,7 @@ else
     CXXFLAGS="${CXXFLAGS//-std=c++14/}"
 fi
 
-cmake -E env CXXFLAGS="${CXXFLAGS}" cmake \
+cmake \
     -DCMAKE_BUILD_TYPE=release \
     -DCMAKE_INSTALL_PREFIX=$PREFIX \
     -DCMAKE_INSTALL_LIBDIR=$PREFIX/lib \
