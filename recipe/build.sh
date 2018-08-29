@@ -26,7 +26,7 @@ if [[ ${HOST} =~ .*darwin.* ]]; then
 fi
 
 # CMake has a hard time coping with our hard-coding of c++ standard.  Arrow sets it in cmake (CMAKE_CXX_STANDARD)
-if [[ ${HOST} =~ .*linux.* ]]; then
+if [[ ${target_platform} =~ .*linux.* ]]; then
     CXXFLAGS="${CXXFLAGS//-std=c++17/}"
     # I hate you so much CMake.
     LIBPTHREAD=$(find ${PREFIX} -name "libpthread.so")
