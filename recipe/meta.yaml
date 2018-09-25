@@ -11,8 +11,6 @@ source:
   url: https://github.com/apache/arrow/archive/{{ commit }}.tar.gz
   sha256: {{ checksum }}
   patches:
-    - 0001-remove-Werror-for-compilation-on-mac-and-linux-32.patch
-    - 0002-add-external-ORC-capability.patch
     - 0003-add-orc-Exceptions.hh-to-adapter.cc.patch
     - 0004-guard-CXXFLAGS-setting-with-check-to-see-if-it-s-alr.patch
 
@@ -36,6 +34,7 @@ requirements:
     - snappy
     - brotli
     - zstd
+    # provides a static lib
     - orc
     - protobuf
     # for run exports
