@@ -17,7 +17,7 @@ source:
     - 0004-guard-CXXFLAGS-setting-with-check-to-see-if-it-s-alr.patch
 
 build:
-  number: 7
+  number: 0
   skip: true  # [(win and vc<14) or win32 or linux32]
   run_exports:
     - {{ pin_subpackage("arrow-cpp", max_pin="x.x") }}
@@ -44,11 +44,10 @@ requirements:
     # arrow builds its own, because the do some squirrelly mods to it
     # - jemalloc      # [unix]
     - python
-    - numpy 1.11.*
+    - numpy-devel  {{ numpy }}
 
   run:
     - libboost {{ boost }}
-    - {{ pin_compatible('numpy') }}
     - python
 
 test:
