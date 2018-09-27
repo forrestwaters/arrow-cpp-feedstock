@@ -40,7 +40,7 @@ requirements:
     # for run exports
     - libprotobuf
     - lz4-c
-    # arrow builds its own, because the do some squirrelly mods to it
+    # arrow builds its own, because they do some squirrelly mods to it
     # - jemalloc      # [unix]
     - python
     - numpy-devel  {{ numpy }}
