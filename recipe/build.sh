@@ -29,8 +29,8 @@ fi
 if [[ ${target_platform} =~ .*linux.* ]]; then
     CXXFLAGS="${CXXFLAGS//-std=c++17/}"
     # I hate you so much CMake.
-    LIBPTHREAD=$(find ${PREFIX} -name "libpthread.so")
-    _CMAKE_EXTRA_CONFIG+=(-DPTHREAD_LIBRARY=${LIBPTHREAD})
+    LIBPTHREAD=$(find ${BUILD_PREFIX} -name "libpthread.so")
+    _CMAKE_EXTRA_CONFIG+=("-DPTHREAD_LIBRARY=${LIBPTHREAD}")
 else
     CXXFLAGS="${CXXFLAGS//-std=c++14/}"
 fi
@@ -51,11 +51,11 @@ cmake \
     -DBROTLI_HOME=$PREFIX \
     -DFLATBUFFERS_HOME=$PREFIX \
     -DLZ4_HOME=$PREFIX \
-    -DORC_HOME=$PREFIX \
     -DRAPIDJSON_HOME=$PREFIX \
     -DSNAPPY_HOME=$PREFIX \
     -DZLIB_HOME=$PREFIX \
     -DZSTD_HOME=$PREFIX \
+    -DTHRIFT_HOME=$PREFIX \
     -DPROTOBUF_HOME=$PREFIX \
     -DCMAKE_C_COMPILER=$(type -p ${CC})     \
     -DCMAKE_CXX_COMPILER=$(type -p ${CXX})  \
@@ -65,5 +65,6 @@ cmake \
     "${_CMAKE_EXTRA_CONFIG[@]}" \
     ..
 
-make -j${CPU_COUNT}
+# make VERBOSE=1
+make -j${CPU_COUNT} VERBOSE=1
 make install

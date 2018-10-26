@@ -1,21 +1,19 @@
-{% set version = "0.10.0" %}
-{% set commit = "07f142df646c9070fc9c627004dfdc96914fe487" %}
-{% set checksum = "ec8494f1906a2919d1eaa9445c97f88eacd38695bfbc5ae5f44315bcbbd6e609" %}
+{% set version = "0.11.0" %}
+{% set checksum = "1838faa3775e082062ad832942ebc03aaf95386c0284288346ddae0632be855d" %}
 
 package:
   name: arrow-cpp
   version: {{ version }}
 
 source:
-  fn: {{ commit }}.tar.gz
-  url: https://github.com/apache/arrow/archive/{{ commit }}.tar.gz
+  url: http://apache.cs.utah.edu/arrow/arrow-{{ version }}/apache-arrow-{{ version }}.tar.gz
   sha256: {{ checksum }}
-  patches:
-    - 0003-add-orc-Exceptions.hh-to-adapter.cc.patch
-    - 0004-guard-CXXFLAGS-setting-with-check-to-see-if-it-s-alr.patch
+  # patches:
+  #   - 0003-add-orc-Exceptions.hh-to-adapter.cc.patch
+  #   - 0004-guard-CXXFLAGS-setting-with-check-to-see-if-it-s-alr.patch
 
 build:
-  number: 0
+  number: 1
   skip: true  # [(win and vc<14) or win32 or linux32]
   run_exports:
     - {{ pin_subpackage("arrow-cpp", max_pin="x.x") }}
@@ -27,23 +25,22 @@ requirements:
     - {{ compiler('cxx') }}
     - autoconf              # [unix]
   host:
-    - libboost {{ boost }}
-    - flatbuffers
-    - rapidjson
-    - zlib
-    - snappy
     - brotli
-    - zstd
-    # provides a static lib
-    - orc
-    - protobuf
-    # for run exports
-    - libprotobuf
+    - flatbuffers
+    - glog
+    - libboost {{ boost }}
+    - libprotobuf-static  {{ libprotobuf }}
     - lz4-c
     # arrow builds its own, because they do some squirrelly mods to it
     # - jemalloc      # [unix]
-    - python
     - numpy-devel  {{ numpy }}
+    # - protobuf
+    - python
+    - rapidjson
+    - snappy
+    - thrift-cpp >=0.11
+    - zlib
+    - zstd
 
   run:
     - libboost {{ boost }}
