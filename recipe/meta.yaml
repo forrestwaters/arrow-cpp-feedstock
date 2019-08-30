@@ -1,63 +1,99 @@
-{% set version = "0.11.1" %}
-{% set checksum = "c524f3d47f0cdb7445c0326b20e79f60485e12daeb2adc8ad6a845ad6c19c1ac" %}
+{% set version = "0.13.0" %}
+{% set filename = "apache-arrow-" + version + ".tar.gz" %}
+{% set checksum = "ac2a77dd9168e9892e432c474611e86ded0be6dfe15f689c948751d37f81391a" %}
+
+{% set posix = 'm2-' if win else '' %}
 
 package:
   name: arrow-cpp
   version: {{ version }}
 
 source:
-  url: http://apache.cs.utah.edu/arrow/arrow-{{ version }}/apache-arrow-{{ version }}.tar.gz
+  fn: {{ filename }}
+  url: https://archive.apache.org/dist/arrow/arrow-{{ version }}/{{ filename }}
   sha256: {{ checksum }}
-  # patches:
-  #   - 0003-add-orc-Exceptions.hh-to-adapter.cc.patch
-  #   - 0004-guard-CXXFLAGS-setting-with-check-to-see-if-it-s-alr.patch
 
 build:
   number: 0
-  skip: true  # [(win and vc<14) or win32 or linux32]
+  skip: true # [win32]
+  skip: true # [win and vc<14]
   run_exports:
     - {{ pin_subpackage("arrow-cpp", max_pin="x.x") }}
 
 requirements:
   build:
     - cmake
+    - autoconf  # [unix]
+    - ninja
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - autoconf              # [unix]
   host:
-    - brotli
-    - flatbuffers
-    - glog
     - libboost {{ boost }}
-    - libprotobuf-static  {{ libprotobuf }}
+    - brotli
+    - double-conversion
+    - flatbuffers
+    - gflags
+    - glog
+    - libprotobuf
     - lz4-c
-    # arrow builds its own, because they do some squirrelly mods to it
-    # - jemalloc      # [unix]
-    - numpy-devel  {{ numpy }}
-    # - protobuf
+    - numpy >=1.14, <1.15
+    - orc  # [unix]
     - python
     - rapidjson
+    - re2
     - snappy
     - thrift-cpp >=0.11
     - zlib
     - zstd
 
   run:
+    - {{ pin_compatible('numpy', lower_bound='1.14') }}
     - libboost {{ boost }}
+    - brotli
+    - double-conversion
+    - gflags
+    - glog
+    - lz4-c
     - python
+    - re2
+    - snappy
+    - zlib
+    - zstd
 
 test:
+  requires:
+    - conda-build #[osx]
   commands:
-    - test -f $PREFIX/lib/libarrow.a  # [unix]
-    - test -f $PREFIX/lib/libarrow.so  # [linux]
-    - test -f $PREFIX/lib/libarrow_python.so  # [linux]
-    - test -f $PREFIX/lib/libplasma.so  # [linux]
-    - test -f $PREFIX/lib/libarrow.dylib  # [osx]
+    # headers
+    - test -f $PREFIX/include/arrow/api.h              # [unix]
+    - test -f $PREFIX/include/plasma/client.h          # [unix]
+    - test -f $PREFIX/include/parquet/api/reader.h     # [unix]
+    - if not exist %LIBRARY_INC%\\arrow\\api.h exit 1            # [win]
+    - if not exist %LIBRARY_INC%\\parquet\\api\\reader.h exit 1  # [win]
+
+    # shared
+    - test -f $PREFIX/lib/libarrow.so            # [linux]
+    - test -f $PREFIX/lib/libarrow_python.so     # [linux]
+    - test -f $PREFIX/lib/libparquet.so          # [linux]
+    - test -f $PREFIX/lib/libplasma.so           # [linux]
+    - test -f $PREFIX/lib/libarrow.dylib         # [osx]
     - test -f $PREFIX/lib/libarrow_python.dylib  # [osx]
-    - test -f $PREFIX/lib/libplasma.dylib  # [osx]
-    - if not exist %LIBRARY_INC%\\arrow\\api.h exit 1               # [win]
+    - test -f $PREFIX/lib/libparquet.dylib       # [osx]
+    - test -f $PREFIX/lib/libplasma.dylib        # [osx]
     - if not exist %PREFIX%\\Library\\bin\\arrow.dll exit 1         # [win]
     - if not exist %PREFIX%\\Library\\bin\\arrow_python.dll exit 1  # [win]
+    - if not exist %PREFIX%\\Library\\bin\\parquet.dll exit 1       # [win]
+    - conda inspect linkages -p $PREFIX $PKG_NAME        # [not win]
+    - conda inspect objects -p $PREFIX $PKG_NAME         # [osx]
+
+    # absence of static libraries
+    - test ! -f $PREFIX/lib/libarrow.a         # [unix]
+    - test ! -f $PREFIX/lib/libarrow_python.a  # [unix]
+    - test ! -f $PREFIX/lib/libplasma.a        # [unix]
+    - test ! -f $PREFIX/lib/libparquet.a       # [unix]
+    - if exist %PREFIX%\\Library\\lib\\arrow_static.lib exit 1         # [win]
+    - if exist %PREFIX%\\Library\\lib\\arrow_python_static.lib exit 1  # [win]
+    - if exist %PREFIX%\\Library\\lib\\parquet_static.lib exit 1       # [win]
 
 about:
   home: http://github.com/apache/arrow
@@ -77,4 +113,3 @@ extra:
     - kou
     - kszucs
     - pitrou
-    - msarahan
