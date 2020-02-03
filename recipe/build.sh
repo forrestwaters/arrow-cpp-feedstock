@@ -2,21 +2,17 @@
 
 set -e
 set -x
-# pulled from https://github.com/AnacondaRecipes/libnetcdf-feedstock/blob/master/recipe/build.sh
-declare -a CMAKE_PLATFORM_FLAGS
-if [[ ${HOST} =~ .*darwin.* ]]; then
-  CMAKE_PLATFORM_FLAGS+=(-DCMAKE_OSX_SYSROOT="${CONDA_BUILD_SYSROOT}")
-  export LDFLAGS=$(echo "${LDFLAGS}" | sed "s/-Wl,-dead_strip_dylibs//g")
-else
-  CMAKE_PLATFORM_FLAGS+=(-DCMAKE_TOOLCHAIN_FILE="${RECIPE_DIR}/cross-linux.cmake")
-fi
-
-if [ "$(uname)" = "Linux" ] ; then
-  export LDFLAGS="${LDFLAGS} -Wl,-rpath-link,${PREFIX}/lib"
-fi
 
 mkdir cpp/build
 pushd cpp/build
+
+EXTRA_CMAKE_ARGS=""
+
+# Include g++'s system headers
+if [ "$(uname)" == "Linux" ]; then
+  SYSTEM_INCLUDES=$(echo | ${CXX} -E -Wp,-v -xc++ - 2>&1 | grep '^ ' | awk '{print "-isystem;" substr($1, 1)}' | tr '\n' ';')
+  EXTRA_CMAKE_ARGS=" -DARROW_GANDIVA_PC_CXX_FLAGS=${SYSTEM_INCLUDES}"
+fi
 
 cmake \
     -DCMAKE_BUILD_TYPE=release \
@@ -25,25 +21,24 @@ cmake \
     -DARROW_DEPENDENCY_SOURCE=SYSTEM \
     -DARROW_PACKAGE_PREFIX=$PREFIX \
     -DARROW_BOOST_USE_SHARED=ON \
-    -DARROW_BUILD_STATIC=OFF \
     -DARROW_BUILD_BENCHMARKS=OFF \
     -DARROW_BUILD_UTILITIES=OFF \
     -DARROW_BUILD_TESTS=OFF \
+    -DARROW_BUILD_STATIC=OFF \
+    -DARROW_SSE42=OFF \
     -DARROW_JEMALLOC=ON \
+    -DARROW_FLIGHT=ON \
     -DARROW_PLASMA=ON \
     -DARROW_PYTHON=ON \
     -DARROW_PARQUET=ON \
     -DARROW_GANDIVA=OFF \
     -DARROW_ORC=ON \
-    -DORC_HOME=$PREFIX \
+    -DARROW_WITH_BZ2=ON \
     -DCMAKE_AR=${AR} \
     -DCMAKE_RANLIB=${RANLIB} \
-    -DPYTHON_EXECUTABLE="${PYTHON}" \
-    -DBoost_NO_BOOST_CMAKE=ON \
     -GNinja \
-    ${CMAKE_PLATFORM_FLAGS[@]} \
+    ${EXTRA_CMAKE_ARGS} \
     ..
-
 ninja install
 
 popd
